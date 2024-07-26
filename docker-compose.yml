@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db-devproduct:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: devproductdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin4
+    hostname: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "4040:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    links:
+      - db-devproduct:postgres
+
+  api-devproduct:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-devproduct:5432/devproductdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - db-devproduct
+
+volumes:
+  postgres_data:
